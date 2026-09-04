@@ -6,6 +6,7 @@ import { RouterProvider } from 'react-router/dom';
 import { paths } from '@/config/paths';
 import { ProtectedRoute } from '@/lib/auth';
 
+import { AuthGate } from './auth-gate';
 import {
   default as AppRoot,
   ErrorBoundary as AppRootErrorBoundary,
@@ -38,9 +39,11 @@ export const createAppRouter = (queryClient: QueryClient) =>
     {
       path: paths.app.root.path,
       element: (
-        <ProtectedRoute>
-          <AppRoot />
-        </ProtectedRoute>
+        <AuthGate>
+          <ProtectedRoute>
+            <AppRoot />
+          </ProtectedRoute>
+        </AuthGate>
       ),
       ErrorBoundary: AppRootErrorBoundary,
       children: [

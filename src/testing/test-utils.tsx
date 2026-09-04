@@ -7,6 +7,7 @@ import userEvent from '@testing-library/user-event';
 import Cookies from 'js-cookie';
 import { RouterProvider, createMemoryRouter } from 'react-router';
 
+import { AuthGate } from '@/app/auth-gate';
 import { AppProvider } from '@/app/provider';
 
 import {
@@ -79,7 +80,9 @@ export const renderApp = async (
       wrapper: () => {
         return (
           <AppProvider>
-            <RouterProvider router={router} />
+            <AuthGate>
+              <RouterProvider router={router} />
+            </AuthGate>
           </AppProvider>
         );
       },
