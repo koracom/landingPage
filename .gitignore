@@ -38,3 +38,10 @@ yarn-error.log*
 # local
 mocked-db.json
 
+
+.vercel
+# Vercel ajoute .env* : on preserve les fichiers d'exemple, c'est eux que
+# l'import Vercel lit pour detecter les variables du projet.
+.env*
+!.env.example
+!.env.example-e2e
