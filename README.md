@@ -109,3 +109,49 @@ yarn test                                 # formulaire, menu mobile, vCard servi
 yarn playwright test --project=landing    # responsive 320 → 1920 + non-régression overflow
 yarn storybook                            # itération visuelle section par section
 ```
+
+---
+
+## Déploiement Vercel
+
+Le dépôt contient un `vercel.json` (preset Vite, repli SPA, en-têtes). Le plus
+simple est l'intégration Git : importer `koracom/landingPage` sur
+[vercel.com/new](https://vercel.com/new), chaque push sur `main` redéploie.
+
+### Variables d'environnement (obligatoires)
+
+À définir sur les environnements Production **et** Preview. `.env` est
+gitignoré, donc rien n'est hérité du dépôt.
+
+| Variable | Valeur | Conséquence si absente |
+| --- | --- | --- |
+| `VITE_APP_API_URL` | `https://api.koracomsn.com` | **Page blanche.** `env.ts` lève « Invalid env provided » au chargement. |
+| `VITE_APP_ENABLE_API_MOCKING` | `false` | MSW démarre en production et intercepte le POST Formspree : aucun message ne part. |
+| `VITE_APP_CONTACT_ENDPOINT` | `https://formspree.io/f/mkjnzbrv` | Le formulaire tourne en mode simulation. |
+| `VITE_APP_SITE_URL` | `https://koracomsn.com` | Repli sur la valeur par défaut du schéma. |
+
+`VITE_APP_API_URL` n'est utilisée que par les routes `/app` et `/auth` héritées
+du starter, mais le schéma d'environnement l'exige au démarrage : une valeur
+syntaxiquement valide suffit tant qu'il n'y a pas de backend.
+
+### En CLI
+
+```bash
+vercel login
+vercel link
+vercel env add VITE_APP_API_URL production
+vercel env add VITE_APP_ENABLE_API_MOCKING production
+vercel env add VITE_APP_CONTACT_ENDPOINT production
+vercel env add VITE_APP_SITE_URL production
+vercel --prod
+```
+
+### Après le premier déploiement
+
+1. Vérifier que `/koracom-africa.vcf` renvoie `Content-Type: text/vcard`
+   (`curl -I https://koracomsn.com/koracom-africa.vcf`) — sans quoi le scan du
+   QR n'ajoute pas le contact.
+2. Scanner le QR de la carte avec un iPhone **et** un Android.
+3. Envoyer un message de test via le formulaire et vérifier sa réception
+   Formspree.
+4. Rattacher le domaine `koracomsn.com` dans les réglages du projet.
