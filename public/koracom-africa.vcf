@@ -1,0 +1,15 @@
+BEGIN:VCARD
+VERSION:3.0
+N:;KoraCom Africa;;;
+FN:KoraCom Africa
+ORG:KoraCom Africa
+TITLE:Agence de communication
+item1.TEL;TYPE=CELL,VOICE:+221710454340
+item1.X-ABLabel:Khadidiatou Sow
+item2.TEL;TYPE=CELL,VOICE:+221774619507
+item2.X-ABLabel:Aminata Ka
+EMAIL;TYPE=WORK,INTERNET:contact@koracom.africa
+URL:https://koracomsn.com
+ADR;TYPE=WORK:;;Dakar;Dakar;;;Sénégal
+NOTE:L'art de captiver, la puissance de communiquer. — Khadidiatou Sow · Aminata Ka, co-fondatrices.
+END:VCARD

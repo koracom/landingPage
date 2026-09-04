@@ -1,0 +1,24 @@
+{
+  "name": "KoraCom Africa",
+  "shortName": "KoraCom",
+  "role": "Agence de communication",
+  "tagline": "L'art de captiver, la puissance de communiquer.",
+  "foundersRole": "Co-fondatrices",
+  "founders": [
+    {
+      "name": "Khadidiatou Sow",
+      "firstName": "Khadidiatou",
+      "phone": "+221 71 045 43 40"
+    },
+    {
+      "name": "Aminata Ka",
+      "firstName": "Aminata",
+      "phone": "+221 77 461 95 07"
+    }
+  ],
+  "email": "contact@koracom.africa",
+  "website": "koracomsn.com",
+  "city": "Dakar",
+  "country": "Sénégal",
+  "vcardFileName": "koracom-africa.vcf"
+}
