@@ -29,7 +29,8 @@ export const HeroSection = () => (
       />
 
       <p className="mb-5 animate-ko-rise text-eyebrow font-medium uppercase text-kora-copper">
-        Agence de communication
+        360&deg;
+        &nbsp; Agence de communication
       </p>
 
       <h1 className="max-w-[16ch] animate-ko-rise font-display text-display-xl font-normal italic text-kora-sand [animation-delay:350ms]">

@@ -99,9 +99,6 @@ export const DigitalCard = () => {
 
         <div className="grid grid-cols-1 items-center gap-6 border-t border-kora-copper/25 p-[clamp(1.375rem,3vw,1.875rem)] xl:grid-cols-[minmax(200px,1fr)_auto] xl:gap-8">
           <div>
-            <p className="text-eyebrow uppercase text-kora-copper">
-              Sans contact
-            </p>
             <p className="mt-3 text-[14.5px] leading-relaxed text-kora-sand/80">
               Scannez le code : nos coordonnées s&apos;ajoutent directement au
               répertoire de votre téléphone.
