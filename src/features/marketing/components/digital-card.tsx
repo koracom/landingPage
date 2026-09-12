@@ -61,9 +61,6 @@ export const DigitalCard = () => {
             height={319}
             className="mx-auto h-[clamp(3.25rem,6vw,4.25rem)] w-auto"
           />
-          <p className="mt-3.5 text-[11px] tracking-[0.42em] text-kora-sand/70 [text-indent:0.42em]">
-            A F R I C A
-          </p>
           <p className="mt-6 font-display text-[clamp(1.125rem,1.8vw,1.375rem)] italic leading-snug text-kora-sand">
             {contactInfo.tagline}
           </p>
