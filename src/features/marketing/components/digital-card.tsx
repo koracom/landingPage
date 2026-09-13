@@ -13,7 +13,7 @@ import { ContactExchangeForm } from './contact-exchange-form';
 const SHARE_MESSAGES = {
   shared: 'Carte partagée.',
   copied: 'Lien copié dans le presse-papier.',
-  unsupported: `Copiez le lien : ${contactInfo.website}`,
+  unsupported: `Copiez le lien : ${contactInfo.cardUrl}`,
 } as const;
 
 /**
@@ -30,7 +30,17 @@ const useInert = (ref: React.RefObject<HTMLElement>, inert: boolean) => {
   }, [ref, inert]);
 };
 
-export const DigitalCard = () => {
+type DigitalCardProps = {
+  /**
+   * Surtitre affiche au-dessus de la carte. La page dediee le remplace :
+   * son titre annonce deja la carte, « Notre carte digitale » y ferait doublon.
+   */
+  eyebrow?: string;
+};
+
+export const DigitalCard = ({
+  eyebrow = 'Notre carte digitale',
+}: DigitalCardProps) => {
   const [isFlipped, setIsFlipped] = React.useState(false);
   const [isExchangeOpen, setIsExchangeOpen] = React.useState(false);
   const [shareMessage, setShareMessage] = React.useState('');
@@ -84,7 +94,7 @@ export const DigitalCard = () => {
     <div>
       <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
         <p className="text-eyebrow font-semibold uppercase text-kora-copper">
-          Notre carte digitale
+          {eyebrow}
         </p>
         <button
           type="button"

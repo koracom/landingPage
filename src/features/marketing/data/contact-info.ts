@@ -1,6 +1,9 @@
 import { env } from '@/config/env';
+import { paths } from '@/config/paths';
 
 import data from './contact-info.json';
+
+const CARD_PATH = paths.card.getHref();
 
 const toTelHref = (phone: string) => `tel:${phone.replace(/\s/g, '')}`;
 
@@ -22,4 +25,9 @@ export const contactInfo = {
   websiteHref: env.SITE_URL,
   /** URL encodee dans le QR : la scanner ajoute le contact au repertoire. */
   vcardUrl: `${env.SITE_URL}/${data.vcardFileName}`,
+  /**
+   * Page autonome de la carte. C'est ce lien que l'on partage : il ouvre la
+   * carte, alors que vcardUrl declenche un telechargement.
+   */
+  cardUrl: `${env.SITE_URL}${CARD_PATH}`,
 } as const;

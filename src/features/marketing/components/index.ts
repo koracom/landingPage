@@ -1,5 +1,6 @@
 export * from './audience-section';
 export * from './contact-section';
+export * from './digital-card';
 export * from './hero-section';
 export * from './mission-section';
 export * from './services-section';

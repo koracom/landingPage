@@ -1,4 +1,7 @@
+import { Link } from 'react-router';
+
 import logo from '@/assets/koracom-logo.svg';
+import { paths } from '@/config/paths';
 
 import { ContactForm } from './contact-form';
 import { DigitalCard } from './digital-card';
@@ -48,7 +51,18 @@ export const ContactSection = () => (
           <ContactForm />
         </div>
 
-        <DigitalCard />
+        <div>
+          <DigitalCard />
+
+          <p className="mt-5 text-sm text-kora-sand/70">
+            <Link
+              to={paths.card.getHref()}
+              className="border-b border-kora-copper/45 pb-0.5 text-kora-copper transition-colors duration-200 ease-out-expo hover:border-kora-copper"
+            >
+              Ouvrir la carte sur sa page dédiée
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   </section>

@@ -4,6 +4,11 @@ export const paths = {
     getHref: () => '/',
   },
 
+  card: {
+    path: '/carte',
+    getHref: () => '/carte',
+  },
+
   auth: {
     register: {
       path: '/auth/register',
