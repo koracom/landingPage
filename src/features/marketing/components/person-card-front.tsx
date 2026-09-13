@@ -1,4 +1,4 @@
-import { contactInfo, type Founder } from '../data/contact-info';
+import { type Founder } from '../data/contact-info';
 
 import { KoraMarkArt } from './kora-mark-art';
 
@@ -53,8 +53,8 @@ const EmailValue = ({ email }: { email: string }) => {
 
 /**
  * Recto individuel, transpose du carton imprime : le nom en grand, la
- * fonction, un filet, puis email et telephone en pastilles, avec le
- * pictogramme kora en filigrane sur la droite.
+ * fonction, un filet, puis email et telephone en pastilles. La kora occupe
+ * le tiers droit et deborde le bord, comme a l'impression.
  */
 export const PersonCardFront = ({ founder }: PersonCardFrontProps) => {
   const rows = [
@@ -77,60 +77,58 @@ export const PersonCardFront = ({ founder }: PersonCardFrontProps) => {
   ];
 
   return (
-    <div className="flex h-full items-center gap-4 overflow-hidden bg-gradient-to-br from-kora-bark to-kora-ink px-[clamp(1.375rem,3vw,2rem)] py-[clamp(1.75rem,4vw,2.5rem)]">
-      {/* Colonne de texte : min-w-0 pour que les adresses longues se coupent
-          au lieu de pousser la colonne decorative hors de la carte. */}
-      <div className="min-w-0 flex-1">
-        <h2 className="font-display text-[clamp(1.4rem,4.4vw,1.9rem)] font-semibold leading-[1.1] text-kora-sand">
+    <div className="relative flex h-full items-center overflow-hidden bg-gradient-to-br from-kora-bark to-kora-ink px-[clamp(1.5rem,4vw,2.75rem)] py-[clamp(1.5rem,3.5vw,2.5rem)]">
+      {/* 58% : la proportion du carton imprime, ou le filet tombe un peu
+          apres le milieu. */}
+      <div className="relative z-10 min-w-0 flex-1 min-[560px]:flex-none min-[560px]:basis-[58%]">
+        <h2 className="font-display text-[clamp(1.45rem,3.4vw,2.3rem)] font-semibold leading-[1.08] text-kora-sand">
           {founder.displayName}
         </h2>
-        <p className="mt-1.5 text-[clamp(0.8rem,2.2vw,0.95rem)] tracking-[0.12em] text-kora-sand/80">
+        <p className="mt-2 text-[clamp(0.82rem,1.5vw,1.05rem)] tracking-[0.14em] text-kora-sand/80">
           {founder.role}
         </p>
 
-        <div className="my-5 h-px w-16 bg-kora-copper/70" />
+        <div className="my-[clamp(0.9rem,2.2vw,1.5rem)] h-px w-20 bg-kora-copper/70" />
 
-        <ul className="space-y-3.5">
+        <ul className="space-y-[clamp(0.6rem,1.6vw,1rem)]">
           {rows.map((row) => (
             <li key={row.key}>
               <a
                 href={row.href}
                 aria-label={row.label}
-                className="flex items-center gap-3 text-kora-sand transition-colors duration-200 ease-out-expo hover:text-kora-copper"
+                className="inline-flex items-center gap-3 text-kora-sand transition-colors duration-200 ease-out-expo hover:text-kora-copper"
               >
-                <span className="grid size-7 shrink-0 place-items-center rounded-full border border-kora-copper/70 text-kora-copper">
+                <span className="grid size-8 shrink-0 place-items-center rounded-full border border-kora-copper/70 text-kora-copper">
                   {row.icon}
                 </span>
-                <span className="min-w-0 text-[clamp(0.78rem,2.4vw,0.92rem)]">
+                <span className="min-w-0 text-[clamp(0.8rem,1.55vw,1rem)]">
                   {row.content}
                 </span>
               </a>
             </li>
           ))}
         </ul>
-
-        {/* Le verso, plus charge, impose la hauteur de la carte. Plutot que
-            de laisser le recto se terminer sur du vide, il se ferme sur
-            l'agence et la ville. */}
-        <div className="mt-7 border-t border-kora-sand/15 pt-4">
-          <p className="text-[12.5px] tracking-[0.16em] text-kora-sand/70">
-            {contactInfo.name}
-          </p>
-          <p className="mt-1 text-[12.5px] text-kora-sand/50">
-            {contactInfo.location}
-          </p>
-        </div>
       </div>
 
-      {/* Le filet vertical et la kora du carton imprime. Retires sous 400px :
-          ils y prendraient la place du texte, qui prime. */}
+      {/* Filet et kora n'apparaissent qu'en format paysage. En dessous, la
+          carte reprend une hauteur libre et la kora, dimensionnee en
+          hauteur, ecraserait le texte. */}
       <div
         aria-hidden="true"
-        className="hidden self-stretch border-l border-kora-copper/30 min-[400px]:block"
+        className="hidden h-[64%] w-px shrink-0 bg-kora-copper/35 min-[560px]:block"
       />
-      {/* Largeur fixe : dimensionner la kora en hauteur la laissait grossir
-          avec la carte et ecraser la colonne de texte. */}
-      <KoraMarkArt className="hidden h-auto w-[76px] shrink-0 self-center text-kora-copper/30 min-[400px]:block" />
+      <div
+        aria-hidden="true"
+        className="relative hidden h-full flex-1 min-[560px]:block"
+      >
+        {/* Elle deborde le bord droit, comme a l'impression. */}
+        <KoraMarkArt className="absolute right-[-12%] top-1/2 h-[92%] w-auto -translate-y-1/2 text-kora-copper/50" />
+      </div>
+
+      {/* En format portrait, le verso plus charge impose la hauteur et le
+          recto se terminerait sur du vide. La kora l'occupe, dimensionnee
+          en largeur pour ne jamais grandir avec la carte. */}
+      <KoraMarkArt className="pointer-events-none absolute bottom-[-8%] right-[-8%] h-auto w-[46%] text-kora-copper/20 min-[560px]:hidden" />
     </div>
   );
 };

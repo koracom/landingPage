@@ -31,6 +31,9 @@ export const PersonCard = ({ founder }: PersonCardProps) => {
         isFlipped={isFlipped}
         onToggle={() => setIsFlipped((flipped) => !flipped)}
         toggleLabels={['Voir le QR code', 'Voir les coordonnées']}
+        // Ratio reel d'une carte de visite (85x49 mm). Sous 560px la carte
+        // reprend une hauteur libre : le format paysage y serait illisible.
+        frameClassName="min-[560px]:aspect-[85/49]"
         front={<PersonCardFront founder={founder} />}
         back={
           <PersonCardBack

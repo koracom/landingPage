@@ -43,7 +43,7 @@ const CardPersonRoute = () => {
       />
 
       <main className="flex flex-1 items-center justify-center px-section-x py-16">
-        <div className="w-full max-w-[420px]">
+        <div className="w-full max-w-[820px]">
           <PersonCard founder={founder} />
 
           <p className="mt-10 text-center text-sm">

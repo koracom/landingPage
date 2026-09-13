@@ -7,24 +7,31 @@ type CardQrCodeProps = {
   qrKey: CardQrKey;
   /** Qui ce QR ajoute au repertoire. */
   contactName: string;
+  /** Cote en pixels. Rendu en SVG : aucune perte de nettete a l'agrandissement. */
+  size?: number;
 };
 
 /**
  * QR code pre-genere au build (`node scripts/generate-contact-assets.mjs`).
  * Rendu en SVG : net a toutes les densites d'ecran, zero JS au runtime.
  */
-export const CardQrCode = ({ qrKey, contactName }: CardQrCodeProps) => {
+export const CardQrCode = ({
+  qrKey,
+  contactName,
+  size = 164,
+}: CardQrCodeProps) => {
   const qr = cardQrs[qrKey];
   const outerSize = qr.size + QUIET_ZONE * 2;
 
   return (
     <svg
       viewBox={`${-QUIET_ZONE} ${-QUIET_ZONE} ${outerSize} ${outerSize}`}
-      width={164}
-      height={164}
+      width={size}
+      height={size}
       role="img"
       aria-label={`QR code : ajouter ${contactName} à vos contacts`}
-      className="block size-[164px] max-w-full [shape-rendering:crispEdges]"
+      style={{ width: size, height: size }}
+      className="block max-w-full [shape-rendering:crispEdges]"
     >
       <rect
         x={-QUIET_ZONE}

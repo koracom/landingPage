@@ -26,6 +26,8 @@ type FlipCardProps = {
   onToggle: () => void;
   /** Libelles du bouton, dans l'ordre : vers le verso, puis vers le recto. */
   toggleLabels: readonly [string, string];
+  /** Applique au cadre : sert a imposer un ratio, par exemple 85/49. */
+  frameClassName?: string;
 };
 
 /**
@@ -40,6 +42,7 @@ export const FlipCard = ({
   isFlipped,
   onToggle,
   toggleLabels,
+  frameClassName,
 }: FlipCardProps) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const frontRef = React.useRef<HTMLDivElement>(null);
@@ -99,6 +102,7 @@ export const FlipCard = ({
           onClick={onCardClick}
           className={cn(
             'grid cursor-pointer',
+            frameClassName,
             !prefersReducedMotion &&
               'transition-transform duration-700 ease-out-expo [transform-style:preserve-3d]',
             !prefersReducedMotion && isFlipped && '[transform:rotateY(180deg)]',
