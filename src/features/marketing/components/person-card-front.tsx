@@ -1,3 +1,5 @@
+import logo from '@/assets/koracom-logo.svg';
+
 import { type Founder } from '../data/contact-info';
 
 import { KoraMarkArt } from './kora-mark-art';
@@ -78,6 +80,17 @@ export const PersonCardFront = ({ founder }: PersonCardFrontProps) => {
 
   return (
     <div className="relative flex h-full items-center overflow-hidden bg-gradient-to-br from-kora-bark to-kora-ink px-[clamp(1.5rem,4vw,2.75rem)] py-[clamp(1.5rem,3.5vw,2.5rem)]">
+      {/* En portrait seulement : le monogramme occupe le haut, que la hauteur
+          imposee par le verso laissait vide. Absent du format paysage, ou le
+          carton imprime ne porte la marque qu'au dos. */}
+      <img
+        src={logo}
+        alt=""
+        width={676}
+        height={319}
+        className="absolute left-[clamp(1.5rem,4vw,2.75rem)] top-[clamp(1.5rem,3.5vw,2.5rem)] h-10 w-auto opacity-90 min-[560px]:hidden"
+      />
+
       {/* 58% : la proportion du carton imprime, ou le filet tombe un peu
           apres le milieu. */}
       <div className="relative z-10 min-w-0 flex-1 min-[560px]:flex-none min-[560px]:basis-[58%]">
