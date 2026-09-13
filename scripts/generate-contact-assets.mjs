@@ -1,6 +1,6 @@
-// Genere les deux artefacts de la carte digitale KoraCom :
-//   1. public/<vcardFileName>            -> la vCard servie par le site
-//   2. src/features/marketing/data/card-qr.ts -> le QR pointant vers cette vCard
+// Genere les artefacts des cartes digitales KoraCom :
+//   1. public/<vcardFileName>            -> une vCard par carte
+//   2. src/features/marketing/data/card-qr.ts -> les QR pointant vers ces vCards
 //
 //   node scripts/generate-contact-assets.mjs
 //
@@ -36,10 +36,12 @@ const contact = JSON.parse(
 );
 
 const siteUrl = readSiteUrl().replace(/\/+$/, '');
-const vcardUrl = `${siteUrl}/${contact.vcardFileName}`;
+const tel = (phone) => phone.replace(/\s/g, '');
 
-// --- 1. vCard servie -------------------------------------------------------
-const vcard = [
+// --- vCards ----------------------------------------------------------------
+
+/** vCard de l'agence : les deux fondatrices sur une meme fiche. */
+const agencyVCard = [
   'BEGIN:VCARD',
   'VERSION:3.0',
   `N:;${contact.name};;;`,
@@ -50,7 +52,7 @@ const vcard = [
   // Apple : iOS affiche le nom en libelle, les autres clients voient deux
   // numeros sans se casser.
   ...contact.founders.flatMap((founder, index) => [
-    `item${index + 1}.TEL;TYPE=CELL,VOICE:${founder.phone.replace(/\s/g, '')}`,
+    `item${index + 1}.TEL;TYPE=CELL,VOICE:${tel(founder.phone)}`,
     `item${index + 1}.X-ABLabel:${founder.name}`,
   ]),
   `EMAIL;TYPE=WORK,INTERNET:${contact.email}`,
@@ -62,41 +64,91 @@ const vcard = [
   'END:VCARD',
 ].join('\r\n');
 
-fs.writeFileSync(
-  path.join(root, 'public', contact.vcardFileName),
-  vcard,
-  'utf8',
-);
+/**
+ * vCard individuelle. Scanner le QR de Khadidiatou doit ajouter Khadidiatou,
+ * pas l'agence : la fiche ne porte donc que ses coordonnees, l'agence
+ * n'apparaissant que comme employeur.
+ */
+const founderVCard = (founder) =>
+  [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    `N:${founder.lastName};${founder.firstName};;;`,
+    `FN:${founder.name}`,
+    `ORG:${contact.name}`,
+    `TITLE:${contact.founderRole}`,
+    `TEL;TYPE=CELL,VOICE:${tel(founder.phone)}`,
+    `EMAIL;TYPE=WORK,INTERNET:${founder.email}`,
+    `URL:${siteUrl}/carte/${founder.slug}`,
+    `ADR;TYPE=WORK:;;${contact.city};${contact.city};;;${contact.country}`,
+    `NOTE:${contact.tagline}`,
+    'END:VCARD',
+  ].join('\r\n');
 
-// --- 2. QR pointant vers la vCard -----------------------------------------
+/** Chaque entree produit une vCard servie et un QR qui pointe vers elle. */
+const cards = [
+  { key: 'agency', fileName: contact.vcardFileName, vcard: agencyVCard },
+  ...contact.founders.map((founder) => ({
+    key: founder.slug,
+    fileName: founder.vcardFileName,
+    vcard: founderVCard(founder),
+  })),
+];
+
+for (const card of cards) {
+  fs.writeFileSync(path.join(root, 'public', card.fileName), card.vcard, 'utf8');
+}
+
+// --- QR pointant vers les vCards -------------------------------------------
 // Niveau H : le QR reste lisible meme partiellement masque ou imprime petit.
 // On ne garde que la matrice, convertie en un seul chemin SVG en unites de
 // module : le composant React n'embarque ainsi aucune librairie QR.
-const matrix = QRCode.create(vcardUrl, { errorCorrectionLevel: 'H' });
-const size = matrix.modules.size;
+const toQr = (url) => {
+  const matrix = QRCode.create(url, { errorCorrectionLevel: 'H' });
+  const size = matrix.modules.size;
 
-const svgPath = [];
-for (let y = 0; y < size; y += 1) {
-  for (let x = 0; x < size; x += 1) {
-    if (matrix.modules.data[y * size + x]) svgPath.push(`M${x} ${y}h1v1h-1z`);
+  const segments = [];
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (matrix.modules.data[y * size + x]) segments.push(`M${x} ${y}h1v1h-1z`);
+    }
   }
-}
+
+  return { size, path: segments.join('') };
+};
+
+const entries = cards.map((card) => {
+  const url = `${siteUrl}/${card.fileName}`;
+  const { size, path: svgPath } = toQr(url);
+  return { ...card, url, size, svgPath };
+});
 
 fs.writeFileSync(
   path.join(root, 'src/features/marketing/data/card-qr.ts'),
   `/* eslint-disable */
 /**
  * GENERE AUTOMATIQUEMENT - ne pas editer a la main.
- * Encode : ${vcardUrl}
  * Regenerer : node scripts/generate-contact-assets.mjs
  */
-export const cardQr = {
-  size: ${size},
-  path: '${svgPath.join('')}',
+export const cardQrs = {
+${entries
+  .map(
+    (entry) => `  /** ${entry.url} */
+  '${entry.key}': {
+    size: ${entry.size},
+    path: '${entry.svgPath}',
+  },`,
+  )
+  .join('\n')}
 } as const;
+
+export type CardQrKey = keyof typeof cardQrs;
 `,
   'utf8',
 );
 
-console.log(`vCard  : public/${contact.vcardFileName}`);
-console.log(`QR     : ${vcardUrl} (${size}x${size} modules)`);
+for (const entry of entries) {
+  console.log(
+    `${entry.key.padEnd(12)} vCard public/${entry.fileName} · QR ${entry.size}x${entry.size} -> ${entry.url}`,
+  );
+}

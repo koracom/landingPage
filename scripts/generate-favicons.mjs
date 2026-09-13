@@ -61,7 +61,7 @@ const scale = (SIZE * MARGIN) / (maxY - minY);
 const cx = (minX + maxX) / 2;
 const cy = (minY + maxY) / 2;
 
-const mark = `<g transform="translate(${SIZE / 2} ${SIZE / 2}) scale(${scale.toFixed(4)}) translate(${-cx} ${-cy})" fill="${SAND}"><path d="${kept.join('')}"/></g>`;
+const mark = `<g transform="translate(${SIZE / 2} ${SIZE / 2}) scale(${scale.toFixed(4)}) translate(${-cx} ${-cy})" fill="${SAND}" fill-rule="evenodd"><path d="${kept.join('')}"/></g>`;
 
 const makeSvg = (radius) =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}" width="${SIZE}" height="${SIZE}"><rect width="${SIZE}" height="${SIZE}" rx="${radius}" fill="${INK}"/>${mark}</svg>`;

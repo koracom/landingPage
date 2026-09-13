@@ -23,8 +23,11 @@ export type CardExchangeInput = z.infer<typeof cardExchangeInputSchema>;
  */
 export const submitCardExchange = async ({
   data,
+  recipient,
 }: {
   data: CardExchangeInput;
+  /** Carte a l'origine de l'echange : l'agence, ou une fondatrice. */
+  recipient: string;
 }) => {
   const endpoint = env.CONTACT_ENDPOINT;
 
@@ -42,7 +45,8 @@ export const submitCardExchange = async ({
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({
       ...data,
-      _subject: `Carte digitale — coordonnées de ${data.nom}`,
+      _subject: `Carte digitale (${recipient}) — coordonnées de ${data.nom}`,
+      destinataire: recipient,
       type: 'echange-carte',
     }),
   });

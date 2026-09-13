@@ -3,6 +3,7 @@ export * from './contact-section';
 export * from './digital-card';
 export * from './hero-section';
 export * from './mission-section';
+export * from './person-card';
 export * from './services-section';
 export * from './site-footer';
 export * from './site-nav';

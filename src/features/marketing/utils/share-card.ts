@@ -1,22 +1,26 @@
-import { contactInfo } from '../data/contact-info';
-
 type ShareResult = 'shared' | 'copied' | 'unsupported';
 
-/**
- * Partage la carte via l'API Web Share, avec repli sur le presse-papier.
- * On partage cardUrl et non siteUrl : le destinataire doit atterrir sur la
- * carte elle-meme, pas en haut de la page d'accueil.
- */
-export const shareCard = async (): Promise<ShareResult> => {
-  const shareData = {
-    title: contactInfo.name,
-    text: `${contactInfo.role} — ${contactInfo.location}`,
-    url: contactInfo.cardUrl,
-  };
+type ShareCardInput = {
+  title: string;
+  text: string;
+  /**
+   * Lien partage : il doit ouvrir la carte. Une URL de vCard declencherait un
+   * telechargement chez le destinataire, ce qui n'est pas un partage.
+   */
+  url: string;
+};
 
+/**
+ * Partage une carte via l'API Web Share, avec repli sur le presse-papier.
+ */
+export const shareCard = async ({
+  title,
+  text,
+  url,
+}: ShareCardInput): Promise<ShareResult> => {
   if (typeof navigator !== 'undefined' && navigator.share) {
     try {
-      await navigator.share(shareData);
+      await navigator.share({ title, text, url });
       return 'shared';
     } catch {
       // Partage annule par l'utilisateur : on tente la copie du lien.
@@ -25,7 +29,7 @@ export const shareCard = async (): Promise<ShareResult> => {
 
   if (typeof navigator !== 'undefined' && navigator.clipboard) {
     try {
-      await navigator.clipboard.writeText(contactInfo.cardUrl);
+      await navigator.clipboard.writeText(url);
       return 'copied';
     } catch {
       return 'unsupported';

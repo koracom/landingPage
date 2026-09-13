@@ -4,16 +4,25 @@
   "role": "Agence de communication",
   "tagline": "L'art de captiver, la puissance de communiquer.",
   "foundersRole": "Co-fondatrices",
+  "founderRole": "Cofondatrice",
   "founders": [
     {
+      "slug": "khadidiatou",
       "name": "Khadidiatou Sow",
       "firstName": "Khadidiatou",
-      "phone": "+221 71 045 43 40"
+      "lastName": "Sow",
+      "phone": "+221 71 045 43 40",
+      "email": "khadidiatou.sow@koracomsn.com",
+      "vcardFileName": "khadidiatou-sow.vcf"
     },
     {
+      "slug": "aminata",
       "name": "Aminata Ka",
       "firstName": "Aminata",
-      "phone": "+221 77 461 95 07"
+      "lastName": "Ka",
+      "phone": "+221 77 461 95 07",
+      "email": "aminata.ka@koracomsn.com",
+      "vcardFileName": "aminata-ka.vcf"
     }
   ],
   "email": "contact@koracomsn.com",

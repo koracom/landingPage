@@ -1,45 +1,40 @@
 import * as React from 'react';
 
-import { contactInfo } from '../data/contact-info';
+import { type Founder } from '../data/contact-info';
 import { useCardActions } from '../hooks/use-card-actions';
 
-import { CardBack } from './card-back';
-import { CardFront } from './card-front';
 import { ContactExchangeForm } from './contact-exchange-form';
 import { FlipCard } from './flip-card';
+import { PersonCardBack } from './person-card-back';
+import { PersonCardFront } from './person-card-front';
 
-type DigitalCardProps = {
-  /**
-   * Surtitre affiche au-dessus de la carte. La page dediee le remplace :
-   * son titre annonce deja la carte, « Notre carte digitale » y ferait doublon.
-   */
-  eyebrow?: string;
+type PersonCardProps = {
+  founder: Founder;
 };
 
-/** Carte de l'agence : les deux fondatrices sur une meme fiche. */
-export const DigitalCard = ({
-  eyebrow = 'Notre carte digitale',
-}: DigitalCardProps) => {
+/** Carte de visite d'une fondatrice : recto coordonnees, verso marque et QR. */
+export const PersonCard = ({ founder }: PersonCardProps) => {
   const [isFlipped, setIsFlipped] = React.useState(false);
   const [isExchangeOpen, setIsExchangeOpen] = React.useState(false);
 
   const { shareMessage, onShare, onDownload } = useCardActions({
-    vcardUrl: contactInfo.vcardUrl,
-    shareUrl: contactInfo.cardUrl,
-    shareTitle: contactInfo.name,
-    shareText: `${contactInfo.role} — ${contactInfo.location}`,
+    vcardUrl: founder.vcardUrl,
+    shareUrl: founder.cardUrl,
+    shareTitle: founder.name,
+    shareText: `${founder.role} — ${founder.name}`,
   });
 
   return (
     <div>
       <FlipCard
-        eyebrow={eyebrow}
+        eyebrow="Carte de visite"
         isFlipped={isFlipped}
         onToggle={() => setIsFlipped((flipped) => !flipped)}
         toggleLabels={['Voir le QR code', 'Voir les coordonnées']}
-        front={<CardFront />}
+        front={<PersonCardFront founder={founder} />}
         back={
-          <CardBack
+          <PersonCardBack
+            founder={founder}
             onDownload={onDownload}
             onExchange={() => setIsExchangeOpen(true)}
             onShare={onShare}
@@ -51,7 +46,7 @@ export const DigitalCard = ({
       {isExchangeOpen ? (
         <div className="mt-6">
           <ContactExchangeForm
-            recipient={contactInfo.name}
+            recipient={founder.name}
             onDone={() => setIsExchangeOpen(false)}
           />
         </div>

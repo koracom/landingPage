@@ -7,6 +7,10 @@ export const paths = {
   card: {
     path: '/carte',
     getHref: () => '/carte',
+    person: {
+      path: '/carte/:slug',
+      getHref: (slug: string) => `/carte/${slug}`,
+    },
   },
 
   auth: {

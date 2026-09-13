@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import jsQR from 'jsqr';
 
+import { cardQrs, type CardQrKey } from '../data/card-qr';
 import contact from '../data/contact-info.json';
 
 const vcardPath = path.resolve(process.cwd(), 'public', contact.vcardFileName);
@@ -71,12 +72,53 @@ const decodeQr = (size: number, svgPath: string) => {
   return jsQR(pixels, dim, dim)?.data ?? null;
 };
 
-test('le QR est reellement decodable et pointe vers la vCard servie', async () => {
-  const { cardQr } = await import('../data/card-qr');
+const qrCards: { key: CardQrKey; fileName: string }[] = [
+  { key: 'agency', fileName: contact.vcardFileName },
+  ...contact.founders.map((founder) => ({
+    key: founder.slug as CardQrKey,
+    fileName: founder.vcardFileName,
+  })),
+];
 
-  const decoded = decodeQr(cardQr.size, cardQr.path);
+qrCards.forEach(({ key, fileName }) => {
+  test(`le QR de la carte ${key} est decodable et pointe vers sa vCard`, () => {
+    const qr = cardQrs[key];
 
-  expect(decoded).not.toBeNull();
-  expect(decoded).toMatch(/^https:\/\//);
-  expect(decoded?.endsWith(`/${contact.vcardFileName}`)).toBe(true);
+    expect(qr).toBeDefined();
+
+    const decoded = decodeQr(qr.size, qr.path);
+
+    expect(decoded).not.toBeNull();
+    expect(decoded).toMatch(/^https:\/\//);
+    expect(decoded?.endsWith(`/${fileName}`)).toBe(true);
+  });
+});
+
+contact.founders.forEach((founder) => {
+  test(`la vCard de ${founder.name} ne porte que ses propres coordonnees`, () => {
+    const filePath = path.resolve(
+      process.cwd(),
+      'public',
+      founder.vcardFileName,
+    );
+    expect(fs.existsSync(filePath)).toBe(true);
+
+    const vcard = fs.readFileSync(filePath, 'utf8');
+    const compact = founder.phone.replace(/\s/g, '');
+
+    expect(compact).toMatch(/^\+221\d{9}$/);
+    expect(vcard).toContain(`FN:${founder.name}`);
+    expect(vcard).toContain(`N:${founder.lastName};${founder.firstName};;;`);
+    expect(vcard).toContain(`TEL;TYPE=CELL,VOICE:${compact}`);
+    expect(vcard).toContain(`EMAIL;TYPE=WORK,INTERNET:${founder.email}`);
+
+    // Le point de la carte individuelle : scanner Khadidiatou ne doit pas
+    // ajouter Aminata.
+    contact.founders
+      .filter((other) => other.slug !== founder.slug)
+      .forEach((other) => {
+        expect(vcard).not.toContain(other.phone.replace(/\s/g, ''));
+        expect(vcard).not.toContain(other.email);
+      });
+  });
 });

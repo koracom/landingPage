@@ -9,13 +9,18 @@ import { ContactField, contactControlClassName } from './contact-field';
 
 type ContactExchangeFormProps = {
   onDone: () => void;
+  /** Carte d'ou part l'echange, reportee dans l'objet du message recu. */
+  recipient: string;
 };
 
 /**
  * Le pendant de la vCard : le visiteur laisse ses coordonnees a l'agence.
  * Volontairement court — quatre champs, dont deux optionnels.
  */
-export const ContactExchangeForm = ({ onDone }: ContactExchangeFormProps) => {
+export const ContactExchangeForm = ({
+  onDone,
+  recipient,
+}: ContactExchangeFormProps) => {
   const exchange = useSubmitCardExchange();
 
   if (exchange.isSuccess) {
@@ -43,7 +48,7 @@ export const ContactExchangeForm = ({ onDone }: ContactExchangeFormProps) => {
     <Form
       schema={cardExchangeInputSchema}
       className="flex flex-col gap-5 space-y-0 border border-kora-copper/35 p-[clamp(1.25rem,3vw,1.75rem)]"
-      onSubmit={(values) => exchange.mutate({ data: values })}
+      onSubmit={(values) => exchange.mutate({ data: values, recipient })}
     >
       {({ register, formState }) => (
         <>

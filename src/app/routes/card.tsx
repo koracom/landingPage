@@ -28,7 +28,28 @@ const CardRoute = () => {
               deux fois la meme signature a quelques centimetres d'ecart. */}
           <DigitalCard eyebrow="Carte de visite" />
 
-          <p className="mt-10 text-center text-sm">
+          <nav aria-label="Cartes individuelles" className="mt-10">
+            <p className="text-center text-eyebrow font-semibold uppercase text-kora-sand/55">
+              Cartes individuelles
+            </p>
+            <ul className="mt-4 flex flex-col gap-3">
+              {contactInfo.founders.map((founder) => (
+                <li key={founder.slug}>
+                  <Link
+                    to={paths.card.person.getHref(founder.slug)}
+                    className="flex min-h-[52px] items-center justify-between gap-3 rounded-sm border border-kora-copper/35 px-4 text-sm text-kora-sand transition-colors duration-200 ease-out-expo hover:border-kora-copper hover:bg-kora-copper/10"
+                  >
+                    <span>{founder.name}</span>
+                    <span className="shrink-0 text-[10.5px] uppercase tracking-[0.18em] text-kora-copper">
+                      {founder.role}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <p className="mt-8 text-center text-sm">
             <Link
               to={paths.home.getHref()}
               className="border-b border-kora-copper/45 pb-0.5 text-kora-copper transition-colors duration-200 ease-out-expo hover:border-kora-copper"
