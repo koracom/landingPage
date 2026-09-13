@@ -33,9 +33,6 @@ export const CardFront = () => (
         height={319}
         className="mx-auto h-[clamp(3rem,5.5vw,4rem)] w-auto"
       />
-      <p className="mt-3 text-[11px] tracking-[0.42em] text-kora-sand/70 [text-indent:0.42em]">
-        A F R I C A
-      </p>
       <p className="mt-5 font-display text-[clamp(1.05rem,1.7vw,1.3rem)] italic leading-snug text-kora-sand">
         {contactInfo.tagline}
       </p>

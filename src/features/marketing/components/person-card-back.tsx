@@ -50,9 +50,6 @@ export const PersonCardBack = ({
         height={319}
         className="mx-auto h-[clamp(2.25rem,4.5vw,3.25rem)] w-auto"
       />
-      <p className="mt-2.5 text-[10.5px] tracking-[0.42em] text-kora-sand/70 [text-indent:0.42em]">
-        A F R I C A
-      </p>
       <p className="mt-4 font-display text-[clamp(0.9rem,1.5vw,1.1rem)] italic leading-snug text-kora-sand">
         {contactInfo.tagline}
       </p>
