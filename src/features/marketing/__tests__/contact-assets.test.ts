@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import jsQR from 'jsqr';
+
 import contact from '../data/contact-info.json';
 
 const vcardPath = path.resolve(process.cwd(), 'public', contact.vcardFileName);
@@ -32,11 +34,49 @@ test('la vCard expose un numero libelle par fondatrice', () => {
   });
 });
 
-test('le QR encode bien l URL de la vCard servie', async () => {
-  const { cardQr } = await import('../data/card-qr');
-  const { contactInfo } = await import('../data/contact-info');
+// Un QR peut avoir la bonne taille, le bon nombre de modules noirs et rester
+// totalement indechiffrable : c'est exactement ce qui est parti en production.
+// Seul un decodage reel prouve qu'il fonctionne.
+const decodeQr = (size: number, svgPath: string) => {
+  const grid = Array.from({ length: size }, () => new Array(size).fill(0));
+  for (const [, x, y] of svgPath.matchAll(/M(\d+) (\d+)h1v1h-1z/g)) {
+    grid[Number(y)][Number(x)] = 1;
+  }
 
-  expect(contactInfo.vcardUrl.endsWith(`/${contact.vcardFileName}`)).toBe(true);
-  expect(cardQr.size).toBeGreaterThan(20);
-  expect(cardQr.path.length).toBeGreaterThan(100);
+  // Zone de silence de 4 modules exigee par la norme, puis agrandissement :
+  // un decodeur a besoin de plusieurs pixels par module.
+  const quietZone = 4;
+  const scale = 8;
+  const dim = (size + quietZone * 2) * scale;
+  const pixels = new Uint8ClampedArray(dim * dim * 4).fill(255);
+
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      if (!grid[y][x]) continue;
+      for (let dy = 0; dy < scale; dy += 1) {
+        for (let dx = 0; dx < scale; dx += 1) {
+          const offset =
+            (((y + quietZone) * scale + dy) * dim +
+              (x + quietZone) * scale +
+              dx) *
+            4;
+          pixels[offset] = 0;
+          pixels[offset + 1] = 0;
+          pixels[offset + 2] = 0;
+        }
+      }
+    }
+  }
+
+  return jsQR(pixels, dim, dim)?.data ?? null;
+};
+
+test('le QR est reellement decodable et pointe vers la vCard servie', async () => {
+  const { cardQr } = await import('../data/card-qr');
+
+  const decoded = decodeQr(cardQr.size, cardQr.path);
+
+  expect(decoded).not.toBeNull();
+  expect(decoded).toMatch(/^https:\/\//);
+  expect(decoded?.endsWith(`/${contact.vcardFileName}`)).toBe(true);
 });

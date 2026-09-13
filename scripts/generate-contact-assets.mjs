@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { qr } from './qr.mjs';
+import QRCode from 'qrcode';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -69,7 +69,18 @@ fs.writeFileSync(
 );
 
 // --- 2. QR pointant vers la vCard -----------------------------------------
-const { size, path: svgPath } = qr(vcardUrl);
+// Niveau H : le QR reste lisible meme partiellement masque ou imprime petit.
+// On ne garde que la matrice, convertie en un seul chemin SVG en unites de
+// module : le composant React n'embarque ainsi aucune librairie QR.
+const matrix = QRCode.create(vcardUrl, { errorCorrectionLevel: 'H' });
+const size = matrix.modules.size;
+
+const svgPath = [];
+for (let y = 0; y < size; y += 1) {
+  for (let x = 0; x < size; x += 1) {
+    if (matrix.modules.data[y * size + x]) svgPath.push(`M${x} ${y}h1v1h-1z`);
+  }
+}
 
 fs.writeFileSync(
   path.join(root, 'src/features/marketing/data/card-qr.ts'),
@@ -81,7 +92,7 @@ fs.writeFileSync(
  */
 export const cardQr = {
   size: ${size},
-  path: '${svgPath}',
+  path: '${svgPath.join('')}',
 } as const;
 `,
   'utf8',
