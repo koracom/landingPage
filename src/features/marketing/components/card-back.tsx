@@ -22,7 +22,6 @@ export const CardBack = ({
     </div>
 
     <div>
-      <p className="text-eyebrow uppercase text-kora-copper">Sans contact</p>
       <p className="mx-auto mt-2.5 max-w-[34ch] text-[14.5px] leading-relaxed text-kora-sand/80">
         Scannez le code : nos coordonnées s&apos;ajoutent directement au
         répertoire de votre téléphone.
