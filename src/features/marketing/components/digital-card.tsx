@@ -1,11 +1,14 @@
 import * as React from 'react';
 
-import logo from '@/assets/koracom-logo.svg';
+import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import { cn } from '@/utils/cn';
 
 import { contactInfo } from '../data/contact-info';
 import { shareCard } from '../utils/share-card';
 
-import { CardQrCode } from './card-qr-code';
+import { CardBack } from './card-back';
+import { CardFront } from './card-front';
+import { ContactExchangeForm } from './contact-exchange-form';
 
 const SHARE_MESSAGES = {
   shared: 'Carte partagée.',
@@ -13,29 +16,32 @@ const SHARE_MESSAGES = {
   unsupported: `Copiez le lien : ${contactInfo.website}`,
 } as const;
 
-const rows = [
-  {
-    label: 'ÉCRIRE',
-    value: contactInfo.email,
-    href: `mailto:${contactInfo.email}`,
-  },
-  // Les deux fondatrices sont joignables directement : le prenom sert de
-  // libelle, plus court que le nom complet dans la colonne de droite.
-  ...contactInfo.founders.map((founder) => ({
-    label: founder.firstName,
-    value: founder.phone,
-    href: founder.phoneHref,
-  })),
-  {
-    label: 'SITE',
-    value: contactInfo.website,
-    href: contactInfo.websiteHref,
-  },
-];
+/**
+ * Retire la face cachee de l'ordre de tabulation et de l'arbre
+ * d'accessibilite. Sans cela on tabule dans des liens invisibles : le piege
+ * classique des cartes qui se retournent.
+ */
+const useInert = (ref: React.RefObject<HTMLElement>, inert: boolean) => {
+  React.useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    if (inert) node.setAttribute('inert', '');
+    else node.removeAttribute('inert');
+  }, [ref, inert]);
+};
 
 export const DigitalCard = () => {
+  const [isFlipped, setIsFlipped] = React.useState(false);
+  const [isExchangeOpen, setIsExchangeOpen] = React.useState(false);
   const [shareMessage, setShareMessage] = React.useState('');
+
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const frontRef = React.useRef<HTMLDivElement>(null);
+  const backRef = React.useRef<HTMLDivElement>(null);
   const timeoutRef = React.useRef<number>();
+
+  useInert(frontRef, isFlipped);
+  useInert(backRef, !isFlipped);
 
   React.useEffect(() => () => window.clearTimeout(timeoutRef.current), []);
 
@@ -46,83 +52,104 @@ export const DigitalCard = () => {
     timeoutRef.current = window.setTimeout(() => setShareMessage(''), 3500);
   };
 
+  // La vCard servie porte deja Content-Disposition: attachment, donc le
+  // navigateur telecharge sans quitter la page. On reste ainsi sur le fichier
+  // exact vers lequel pointe le QR.
+  const onDownload = () => window.location.assign(contactInfo.vcardUrl);
+
+  // Le clic n'importe ou retourne la carte, sauf sur un element interactif.
+  const onCardClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest('a, button, input, label'))
+      return;
+    setIsFlipped((flipped) => !flipped);
+  };
+
+  const faceBase =
+    'col-start-1 row-start-1 rounded-sm border border-kora-copper/35 bg-kora-ink transition-[visibility]';
+
+  /**
+   * Double securite sur la face cachee : `inert` seul ne suffit pas (teste
+   * sous Chrome 152, le focus atteint encore les liens), donc on ajoute
+   * visibility:hidden, qui exclut reellement du parcours de tabulation.
+   * Le delai laisse la rotation se terminer avant de masquer.
+   */
+  const hiddenFace = (hidden: boolean) =>
+    hidden
+      ? prefersReducedMotion
+        ? 'invisible'
+        : 'invisible delay-700'
+      : 'visible delay-0';
+
   return (
     <div>
-      <p className="mb-6 text-eyebrow font-semibold uppercase text-kora-copper">
-        Notre carte digitale
-      </p>
+      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+        <p className="text-eyebrow font-semibold uppercase text-kora-copper">
+          Notre carte digitale
+        </p>
+        <button
+          type="button"
+          onClick={() => setIsFlipped((flipped) => !flipped)}
+          aria-pressed={isFlipped}
+          className="min-h-[44px] border-b border-kora-copper/45 text-sm text-kora-copper transition-colors duration-200 ease-out-expo hover:border-kora-copper"
+        >
+          {isFlipped ? 'Voir les coordonnées' : 'Voir le QR code'}
+        </button>
+      </div>
 
-      <div className="border border-kora-copper/35 bg-kora-ink">
-        <div className="border-b border-kora-copper/25 bg-gradient-to-br from-kora-bark to-kora-ink px-[clamp(1.375rem,3vw,2rem)] py-[clamp(1.75rem,4vw,2.5rem)] text-center">
-          <img
-            src={logo}
-            alt=""
-            width={676}
-            height={319}
-            className="mx-auto h-[clamp(3.25rem,6vw,4.25rem)] w-auto"
-          />
-          <p className="mt-6 font-display text-[clamp(1.125rem,1.8vw,1.375rem)] italic leading-snug text-kora-sand">
-            {contactInfo.tagline}
-          </p>
-          <p className="mt-5 text-[15px] font-semibold text-kora-copper">
-            {contactInfo.foundersLabel}
-          </p>
-          <p className="mt-1.5 text-sm text-kora-sand/75">
-            {contactInfo.foundersRole}
-          </p>
-        </div>
-
-        <ul className="px-[clamp(1.375rem,3vw,2rem)]">
-          {rows.map((row) => (
-            <li key={row.label}>
-              <a
-                href={row.href}
-                className="flex min-h-[56px] items-center justify-between gap-3.5 border-b border-kora-sand/15 py-3.5 text-[15.5px] text-kora-sand transition-colors duration-200 ease-out-expo hover:text-kora-copper"
-              >
-                <span className="[overflow-wrap:anywhere]">{row.value}</span>
-                <span className="shrink-0 text-[10.5px] uppercase tracking-[0.18em] text-kora-copper">
-                  {row.label}
-                </span>
-              </a>
-            </li>
-          ))}
-          <li className="flex min-h-[56px] items-center justify-between gap-3.5 py-3.5 text-[15.5px] text-kora-sand/75">
-            <span>{contactInfo.location}</span>
-            <span className="shrink-0 text-[10.5px] tracking-[0.18em] text-kora-sand/55">
-              SIÈGE
-            </span>
-          </li>
-        </ul>
-
-        <div className="grid grid-cols-1 items-center gap-6 border-t border-kora-copper/25 p-[clamp(1.375rem,3vw,1.875rem)] xl:grid-cols-[minmax(200px,1fr)_auto] xl:gap-8">
-          <div>
-            <p className="mt-3 text-[14.5px] leading-relaxed text-kora-sand/80">
-              Scannez le code : nos coordonnées s&apos;ajoutent directement au
-              répertoire de votre téléphone.
-            </p>
-
-            <button
-              type="button"
-              onClick={onShare}
-              className="mt-4 min-h-[44px] border-b border-kora-copper/45 text-sm text-kora-copper transition-colors duration-200 ease-out-expo hover:border-kora-copper"
-            >
-              Partager la carte
-            </button>
-
-            <p
-              role="status"
-              aria-live="polite"
-              className="mt-3 min-h-5 text-[13.5px] text-kora-sand/80"
-            >
-              {shareMessage}
-            </p>
+      <div
+        className={prefersReducedMotion ? undefined : '[perspective:1600px]'}
+      >
+        {/* Les deux faces partagent la meme cellule de grille : la plus haute
+            impose la hauteur, donc la carte ne saute pas en se retournant. */}
+        {/* Le clic sur la carte est un confort souris. L'activation au
+            clavier passe par le bouton aria-pressed ci-dessus, qui porte
+            un libelle explicite : la regle a11y est satisfaite par ce
+            controle, pas par ce div. */}
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+        <div
+          onClick={onCardClick}
+          className={cn(
+            'grid cursor-pointer',
+            !prefersReducedMotion &&
+              'transition-transform duration-700 ease-out-expo [transform-style:preserve-3d]',
+            !prefersReducedMotion && isFlipped && '[transform:rotateY(180deg)]',
+          )}
+        >
+          <div
+            ref={frontRef}
+            className={cn(
+              faceBase,
+              hiddenFace(isFlipped),
+              !prefersReducedMotion && '[backface-visibility:hidden]',
+            )}
+          >
+            <CardFront />
           </div>
 
-          <div className="justify-self-start border border-kora-copper bg-kora-ink p-1.5 xl:justify-self-end">
-            <CardQrCode />
+          <div
+            ref={backRef}
+            className={cn(
+              faceBase,
+              hiddenFace(!isFlipped),
+              !prefersReducedMotion &&
+                '[backface-visibility:hidden] [transform:rotateY(180deg)]',
+            )}
+          >
+            <CardBack
+              onDownload={onDownload}
+              onExchange={() => setIsExchangeOpen(true)}
+              onShare={onShare}
+              shareMessage={shareMessage}
+            />
           </div>
         </div>
       </div>
+
+      {isExchangeOpen ? (
+        <div className="mt-6">
+          <ContactExchangeForm onDone={() => setIsExchangeOpen(false)} />
+        </div>
+      ) : null}
     </div>
   );
 };
